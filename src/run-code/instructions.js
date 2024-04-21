@@ -20,7 +20,7 @@ const commandMap = (jobID, language) => {
 				outputExt: "out",
 				compilerInfoCommand: "g++ --version",
 			};
-		case "python":
+		case "py":
 			return {
 				executeCodeCommand: "python3",
 				executionArgs: [join(process.cwd(), `codes/${jobID}.py`)],
@@ -38,7 +38,7 @@ const commandMap = (jobID, language) => {
 				outputExt: "out",
 				compilerInfoCommand: "gcc --version",
 			};
-		case "javascript":
+		case "js":
 			return {
 				executeCodeCommand: "node",
 				executionArgs: [join(process.cwd(), `codes/${jobID}.js`)],
@@ -70,14 +70,6 @@ const commandMap = (jobID, language) => {
 	}
 };
 
-const supportedLanguages = [
-	"java",
-	"cpp",
-	"python",
-	"c",
-	"javascript",
-	"go",
-	"csharp",
-];
+const supportedLanguages = ["java", "cpp", "py", "c", "js", "go", "cs"];
 
 module.exports = { commandMap, supportedLanguages };
