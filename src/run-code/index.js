@@ -1,92 +1,104 @@
-const {commandMap, supportedLanguages} = require("./instructions")
-const {createCodeFile} = require("../file-system/createCodeFile")
-const {removeCodeFile} = require("../file-system/removeCodeFile")
-const {info} = require("./info")
+const { commandMap, supportedLanguages } = require("./instructions");
+const { createCodeFile } = require("../file-system/createCodeFile");
+const { removeCodeFile } = require("../file-system/removeCodeFile");
+const { info } = require("./info");
 
-const {spawn} = require("child_process");
+const { spawn } = require("child_process");
 
-async function runCode({language = "", code = "", input = ""}) {
-    const timeout = 30;
+const { addExecutingProcess, removeProcess } = require("./processDict");
 
-    if (code === "")
-        throw {
-            status: 400,
-            error: "No Code found to execute."
-        }
+const eventHandler = require("./eventHandler");
 
-    if (!supportedLanguages.includes(language))
-        throw {
-            status: 400,
-            error: `Please enter a valid language. Check documentation for more details: https://github.com/Jaagrav/CodeX-API#readme. The languages currently supported are: ${supportedLanguages.join(', ')}.`
-        }
+async function runCode({ language = "", code = "", input = "" }) {
+	const timeout = 120;
 
-    const {jobID} = await createCodeFile(language, code);
-    const {compileCodeCommand, compilationArgs, executeCodeCommand, executionArgs, outputExt} = commandMap(jobID, language);
+	if (code === "")
+		throw {
+			status: 400,
+			error: "No Code found to execute.",
+		};
 
-    if (compileCodeCommand) {
-        await new Promise((resolve, reject) => {
-            const compileCode = spawn(compileCodeCommand, compilationArgs || [])
-            compileCode.stderr.on('data', (error) => {
-                reject({
-                    status: 200,
-                    output: '',
-                    error: error.toString(),
-                    language
-                })
-            });
-            compileCode.on('exit', () => {
-                resolve()
-            })
-        })
-    }
+	if (!supportedLanguages.includes(language))
+		throw {
+			status: 400,
+			error: `Please enter a valid language. Check documentation for more details: https://github.com/Jaagrav/CodeX-API#readme. The languages currently supported are: ${supportedLanguages.join(
+				", "
+			)}.`,
+		};
 
-    const result = await new Promise((resolve, reject) => {
-        const executeCode = spawn(executeCodeCommand, executionArgs || []);
-        let output = "", error = "";
+	const { jobID } = await createCodeFile(language, code);
+	const {
+		compileCodeCommand,
+		compilationArgs,
+		executeCodeCommand,
+		executionArgs,
+		outputExt,
+	} = commandMap(jobID, language);
 
-        const timer = setTimeout(async () => {
-            executeCode.kill("SIGHUP");
+	if (compileCodeCommand) {
+		await new Promise((resolve, reject) => {
+			const compileCode = spawn(
+				compileCodeCommand,
+				compilationArgs || []
+			);
+			compileCode.stderr.on("data", (error) => {
+				reject({
+					status: 200,
+					output: "",
+					error: error.toString(),
+					language,
+				});
+			});
+			compileCode.on("exit", () => {
+				resolve();
+			});
+		});
+	}
+	const removeFile = async () => {
+		await removeCodeFile(jobID, language, outputExt);
+		removeProcess(jobID);
+	};
 
-            await removeCodeFile(jobID, language, outputExt);
+	const executeCodeAsync = async () => {
+		const executeCode = spawn(executeCodeCommand, executionArgs || []);
 
-            reject({
-                status: 408,
-                error: `CodeX API Timed Out. Your code took too long to execute, over ${timeout} seconds. Make sure you are sending input as payload if your code expects an input.`
-            })
-        }, timeout * 1000);
+		const timer = setTimeout(async () => {
+			executable.kill("SIGHUP");
+			console.log("this");
+			await removeCodeFile(jobID, language, outputExt);
+			console.log("this");
+			reject({
+				status: 408,
+				error: `CodeX API Timed Out. Your code took too long to execute, over ${timeout} seconds. Make sure you are sending input as payload if your code expects an input.`,
+			});
+		}, timeout * 1000);
 
-        if (input !== "") {
-            input.split('\n').forEach((line) => {
-                executeCode.stdin.write(`${line}\n`);
-            });
-            executeCode.stdin.end();
-        }
+		const processIndex = addExecutingProcess({
+			jobID,
+			executeCode,
+			timer,
+			removeFile,
+		});
 
-        executeCode.stdin.on('error', (err) => {
-            console.log('stdin err', err);
-        });
+		return await eventHandler(processIndex, input, removeFile);
+	};
 
-        executeCode.stdout.on('data', (data) => {
-            output += data.toString();
-        });
+	const result = await new Promise((resolve, reject) => {
+		executeCodeAsync()
+			.then((output) => {
+				resolve(output);
+			})
+			.catch(reject);
+	});
 
-        executeCode.stderr.on('data', (data) => {
-            error += data.toString();
-        });
+	if (result.complete) removeFile();
 
-        executeCode.on('exit', (err) => {
-            clearTimeout(timer);
-            resolve({output, error});
-        });
-    })
-
-    await removeCodeFile(jobID, language, outputExt);
-
-    return {
-        ...result,
-        language,
-        info: await info(language)
-    }
+	return {
+		...result,
+		language,
+		jobID,
+		info: await info(language),
+	};
 }
 
-module.exports = {runCode}
+module.exports = { runCode };
