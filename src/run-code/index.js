@@ -67,6 +67,8 @@ async function runCode({language = "", code = "", input = ""}) {
 
         executeCode.stdout.on('data', (data) => {
             output += data.toString();
+            clearTimeout(timer);
+            resolve({output, error});
         });
 
         executeCode.stderr.on('data', (data) => {
