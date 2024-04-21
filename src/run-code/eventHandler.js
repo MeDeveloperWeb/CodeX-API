@@ -1,7 +1,7 @@
 const { changeTimer, getExecutingProcessByIndex } = require("./processDict");
 
 async function eventHandler(processIndex, input) {
-	const { executeCode, timer, removeFile, jobID } =
+	const { executeCode, timer, removeFile } =
 		getExecutingProcessByIndex(processIndex);
 
 	return await new Promise((resolve, reject) => {
@@ -48,6 +48,7 @@ async function eventHandler(processIndex, input) {
 		executeCode.on("exit", (err) => {
 			clearTimeout(timer);
 			if (dataLogSendTimeout) clearTimeout(dataLogSendTimeout);
+			removeFile();
 			resolve({ output, error, complete: true });
 		});
 	});
