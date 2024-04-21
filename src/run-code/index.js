@@ -7,13 +7,11 @@ const {spawn} = require("child_process");
 
 async function runCode({language = "", code = "", input = ""}) {
     const timeout = 30;
-    console.log(code)
     if (code === "")
         throw {
             status: 400,
             error: "No Code found to execute."
         }
-    console.log(code)
 
     if (!supportedLanguages.includes(language))
         throw {
