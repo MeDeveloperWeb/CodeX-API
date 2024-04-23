@@ -4,13 +4,42 @@ const {supportedLanguages} = require("./run-code/instructions");
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8000;
 const cors = require("cors");
 const {info} = require("./run-code/info");
+const socketIO = require("socket.io");
+const { runCodeViaSocket } = require("./run-code/use-socket");
+
+const server = require("node:http").createServer(app);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cors());
+
+const io = socketIO(server, {
+	cors: {
+		origin: "*"
+	}
+});
+
+io.on('connection', (socket) => {
+    console.log('a user connected')
+    socket.on("code", async ({code, language, input = ""}) => {
+        try {
+            await runCodeViaSocket(socket, {code, language, input})
+        } catch (err) {
+            console.log(err)
+            const timeStamp = Date.now()
+
+            socket.emit("error", {
+                timeStamp,
+                status: err?.status || 500,
+                ...err
+            })
+            socket.disconnect()
+        }
+    })
+});
 
 const sendResponse = (res, statusCode, body) => {
     const timeStamp = Date.now()
@@ -44,4 +73,4 @@ app.get('/list', async (req, res) => {
     sendResponse(res, 200, {supportedLanguages: body})
 })
 
-app.listen(port);
+server.listen(port);
