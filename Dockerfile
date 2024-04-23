@@ -1,5 +1,7 @@
 FROM ubuntu:18.04
 
+USER lightyagami
+
 RUN dpkg --configure -a
 
 ENV PYTHON_VERSION 3.7.7
