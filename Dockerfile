@@ -1,7 +1,5 @@
 FROM ubuntu:18.04
 
-USER lightyagami
-
 RUN dpkg --configure -a
 
 ENV PYTHON_VERSION 3.7.7
@@ -22,6 +20,10 @@ RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
 RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
 ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 # RUN nvm install 16.13.2
+
+# Create a non-root user with UID between 10000 and 20000
+RUN useradd -u 15000 -m myuser
+USER myuser
 
 COPY . /app
 WORKDIR /app
