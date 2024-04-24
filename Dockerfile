@@ -1,5 +1,9 @@
 FROM ubuntu:22.04
 
+USER 10014
+
+USER root
+
 RUN dpkg --configure -a
 
 ENV PYTHON_VERSION 3.7.7
@@ -25,7 +29,7 @@ COPY . /app
 WORKDIR /app
 RUN npm install
 
-USER 10014
+
 
 EXPOSE 3000
 CMD ["npm", "start"]
