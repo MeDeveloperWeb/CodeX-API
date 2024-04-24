@@ -65,7 +65,7 @@ RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION} && \
 ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 
 # Create a non-root user with UID between 10000 and 20000
-USER 15000
+# USER 15000
 
 # Copy application files
 COPY . /app
