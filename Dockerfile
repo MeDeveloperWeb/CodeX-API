@@ -1,5 +1,8 @@
 FROM ubuntu:18.04
 
+# Create a non-root user with UID between 10000 and 20000
+USER 15000
+
 RUN dpkg --configure -a
 
 ENV PYTHON_VERSION 3.7.7
@@ -21,12 +24,10 @@ RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
 ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 # RUN nvm install 16.13.2
 
-# Create a non-root user with UID between 10000 and 20000
-USER 15000
-
 COPY . /app
 WORKDIR /app
+RUN ls
 RUN npm install
 
-EXPOSE 3000
+EXPOSE 8000
 CMD ["npm", "start"]
