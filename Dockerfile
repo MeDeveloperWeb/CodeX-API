@@ -25,5 +25,7 @@ COPY . /app
 WORKDIR /app
 RUN npm install
 
+USER 10014
+
 EXPOSE 3000
 CMD ["npm", "start"]
