@@ -13,7 +13,7 @@ RUN apt-get -y install gcc mono-mcs golang-go \
     default-jre default-jdk nodejs npm \
     python3-pip python3 curl && \
     rm -rf /var/lib/apt/lists/*
-
+RUN ls
 ENV NVM_DIR=/usr/local/nvm
 ENV NODE_VERSION=18.18.0
 RUN curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
