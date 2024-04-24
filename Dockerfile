@@ -12,7 +12,7 @@ RUN apt-get -y install gcc mono-mcs golang-go \
     python3-pip python3 curl && \
     rm -rf /var/lib/apt/lists/*
 
-ENV NODE_VERSION=16.13.2
+ENV NODE_VERSION=18.18.0
 RUN curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
 ENV NVM_DIR=/root/.nvm
 RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
