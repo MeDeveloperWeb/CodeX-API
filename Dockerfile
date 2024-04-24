@@ -72,7 +72,7 @@ COPY . /app
 WORKDIR /app
 
 # Install npm dependencies
-RUN npm install --quiet
+RUN npm install
 
 # Expose port
 EXPOSE 8000
