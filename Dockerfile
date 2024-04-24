@@ -38,7 +38,7 @@ COPY . /app
 WORKDIR /app
 
 # Install dependencies based on your project needs
-npm install  
+RUN npm install  
 # Installs dependencies from package.json
 
 # Expose port (adjust if needed)
