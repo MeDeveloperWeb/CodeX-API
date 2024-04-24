@@ -26,8 +26,12 @@ USER 15000
 
 COPY . /app
 WORKDIR /app
-RUN ls
-RUN npm install
+
+RUN apt-get update && \
+    apt-get install -y npm && \
+    npm cache clean --force && \
+    rm -rf /var/lib/apt/lists/* && \
+    npm install
 
 EXPOSE 8000
 CMD ["npm", "start"]
