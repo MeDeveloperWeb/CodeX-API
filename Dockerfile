@@ -6,7 +6,7 @@ RUN dpkg --configure -a
 RUN ls
 RUN cd usr
 RUN ls
-RUN cd local
+RUN cd usr
 RUN ls
 
 ENV PYTHON_VERSION 3.7.7
