@@ -16,11 +16,11 @@ RUN apt-get -y install gcc mono-mcs golang-go \
 
 ENV NODE_VERSION=18.18.0
 RUN curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
-ENV NVM_DIR=/root/.nvm
+ENV NVM_DIR=/usr/local/nvm
 RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
 RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
 RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
-ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
+ENV PATH="$NVM_DIR/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 # RUN nvm install 16.13.2
 
 COPY . /app
