@@ -1,8 +1,6 @@
 FROM ubuntu:22.04
 
-USER 10014
 
-USER root
 
 RUN dpkg --configure -a
 
@@ -32,4 +30,5 @@ RUN npm install
 
 
 EXPOSE 3000
+USER 10014
 CMD ["npm", "start"]
