@@ -71,7 +71,7 @@ USER 15000
 COPY . /app
 WORKDIR /app
 
-sudo npm cache clean --force 
+RUN sudo npm cache clean --force 
 
 # Install npm dependencies
 RUN npm install
