@@ -3,11 +3,6 @@ FROM ubuntu:22.04
 
 
 RUN dpkg --configure -a
-RUN ls
-RUN cd usr
-RUN ls
-RUN cd usr
-RUN ls
 
 ENV PYTHON_VERSION 3.7.7
 ENV PYTHON_PIP_VERSION 20.1
@@ -19,7 +14,7 @@ RUN apt-get -y install gcc mono-mcs golang-go \
     python3-pip python3 curl && \
     rm -rf /var/lib/apt/lists/*
 RUN ls
-ENV NVM_DIR=/usr/local/nvm
+ENV NVM_DIR=/usr/.nvm
 ENV NODE_VERSION=18.18.0
 RUN curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
 
