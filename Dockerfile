@@ -37,9 +37,6 @@ COPY . /app
 # Working directory for your project
 WORKDIR /app
 
-# Copy your project files
-COPY /
-
 # Install dependencies based on your project needs
 npm install  
 # Installs dependencies from package.json
