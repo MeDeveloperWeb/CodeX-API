@@ -11,11 +11,7 @@ const socketIO = require("socket.io");
 const { runCodeViaSocket } = require("./run-code/use-socket");
 
 const corsOptions = {
-	origin: process.env.UI_URL,
-	optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204,
-	credentials: true,
-	methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-	allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept"],
+	origin: "*",
 };
 
 app.use(cors(corsOptions));
