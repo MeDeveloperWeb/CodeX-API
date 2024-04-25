@@ -11,7 +11,9 @@ const socketIO = require("socket.io");
 const { runCodeViaSocket } = require("./run-code/use-socket");
 
 const corsOptions = {
-	origin: "*",
+	origin: process.env.UI_URL,
+	optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+	credentials: true,
 };
 
 app.use(cors(corsOptions));
@@ -21,13 +23,14 @@ const server = require("node:http").createServer(app);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const io = socketIO(server, corsOptions);
+const io = socketIO(server, {
+	cors: corsOptions,
+});
 
 io.on("connection", (socket) => {
 	console.log("a user connected");
 	socket.on("code", async ({ code, language, input = "" }) => {
 		try {
-			console.log("code received");
 			await runCodeViaSocket(socket, { code, language, input });
 		} catch (err) {
 			console.log(err);
@@ -38,7 +41,6 @@ io.on("connection", (socket) => {
 				status: err?.status || 500,
 				...err,
 			});
-			socket.disconnect();
 		}
 	});
 });
