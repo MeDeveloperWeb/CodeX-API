@@ -14,13 +14,15 @@ const server = require("node:http").createServer(app);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cors());
 
-const io = socketIO(server, {
-	cors: {
-		origin: "*"
-	}
-});
+const corsOptions = {
+	origin: process.env.UI_URL,
+	optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
+app.use(cors(corsOptions));
+
+const io = socketIO(server, corsOptions);
 
 io.on('connection', (socket) => {
     console.log('a user connected')
