@@ -1,79 +1,82 @@
-const {runCode} = require("./run-code");
-const {supportedLanguages} = require("./run-code/instructions");
+const { runCode } = require("./run-code");
+const { supportedLanguages } = require("./run-code/instructions");
 
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
 const port = process.env.PORT || 8000;
 const cors = require("cors");
-const {info} = require("./run-code/info");
+const { info } = require("./run-code/info");
 const socketIO = require("socket.io");
 const { runCodeViaSocket } = require("./run-code/use-socket");
 
-const server = require("node:http").createServer(app);
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
-
 const corsOptions = {
 	origin: process.env.UI_URL,
-	optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+	optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204,
+	credentials: true,
+	methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+	allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept"],
 };
 
 app.use(cors(corsOptions));
 
+const server = require("node:http").createServer(app);
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 const io = socketIO(server, corsOptions);
 
-io.on('connection', (socket) => {
-    console.log('a user connected')
-    socket.on("code", async ({code, language, input = ""}) => {
-        try {
-            console.log("code received")
-            await runCodeViaSocket(socket, {code, language, input})
-        } catch (err) {
-            console.log(err)
-            const timeStamp = Date.now()
+io.on("connection", (socket) => {
+	console.log("a user connected");
+	socket.on("code", async ({ code, language, input = "" }) => {
+		try {
+			console.log("code received");
+			await runCodeViaSocket(socket, { code, language, input });
+		} catch (err) {
+			console.log(err);
+			const timeStamp = Date.now();
 
-            socket.emit("error", {
-                timeStamp,
-                status: err?.status || 500,
-                ...err
-            })
-            socket.disconnect()
-        }
-    })
+			socket.emit("error", {
+				timeStamp,
+				status: err?.status || 500,
+				...err,
+			});
+			socket.disconnect();
+		}
+	});
 });
 
 const sendResponse = (res, statusCode, body) => {
-    const timeStamp = Date.now()
+	const timeStamp = Date.now();
 
-    res.status(statusCode).send({
-        timeStamp,
-        status: statusCode,
-        ...body
-    })
-}
+	res.status(statusCode).send({
+		timeStamp,
+		status: statusCode,
+		...body,
+	});
+};
 
 app.post("/", async (req, res) => {
-    try {
-        const output = await runCode(req.body)
-        sendResponse(res, 200, output)
-    } catch (err) {
-        sendResponse(res, err?.status || 500, err)
-    }
-})
+	try {
+		const output = await runCode(req.body);
+		sendResponse(res, 200, output);
+	} catch (err) {
+		sendResponse(res, err?.status || 500, err);
+	}
+});
 
-app.get('/list', async (req, res) => {
-    const body = []
+app.get("/list", async (req, res) => {
+	const body = [];
 
-    for(const language of supportedLanguages) {
-        body.push({
-            language,
-            info: await info(language),
-        })
-    }
+	for (const language of supportedLanguages) {
+		body.push({
+			language,
+			info: await info(language),
+		});
+	}
 
-    sendResponse(res, 200, {supportedLanguages: body})
-})
+	sendResponse(res, 200, { supportedLanguages: body });
+});
 
 server.listen(port);
