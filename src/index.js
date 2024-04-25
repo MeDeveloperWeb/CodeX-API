@@ -28,6 +28,7 @@ io.on('connection', (socket) => {
     console.log('a user connected')
     socket.on("code", async ({code, language, input = ""}) => {
         try {
+            console.log("code received")
             await runCodeViaSocket(socket, {code, language, input})
         } catch (err) {
             console.log(err)
